@@ -1,0 +1,64 @@
+package Assignment;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+public class Pagination {
+	public static void main(String[] args) throws IOException
+ {
+		
+		System.setProperty("window.chrome.driver", "D:\\Udemy\\Selenium Udemy\\Driver\\Chrome\\chromedriver-win64\\chromedriver.exe");
+		WebDriver driver=new ChromeDriver();
+		driver.get("https://in.search.yahoo.com/yhs/search?hspart=sz&hsimp=yhs-002&p=Mercedes+A+Class&type=type80260-4100970935&param1=1319758761");
+		driver.manage().window().maximize();
+		
+		int resultIndex=-1;
+		int paginationCount = 0;
+		
+		while(true) {
+			
+			List<WebElement> result=driver.findElements(By.xpath("//span[@class=\" fc-falcon\"]"));  //It's to scan weblink
+			//System.out.println(result);
+			
+			for(int i=0;i<result.size();i++) {
+				String text=result.get(i).getText().toLowerCase();
+				
+				File f=((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+				FileUtils.copyFile(f,new File("D:\\Assignment\\SS\\Mercedes.jpg"));
+				
+				if(text.contains("engine") || text.contains("horsepower")) {   //Looks like getting random values
+					
+		            System.out.println(text); 
+					resultIndex=i+1;
+					System.out.println("Result found on index: #" + resultIndex);
+                    System.out.println("Pagination count: " + paginationCount);
+                    driver.quit();
+                    return;
+				}
+				
+			}
+			
+			try {
+                WebElement nextBtn = driver.findElement(By.xpath("//a[@class=\"next\"]"));
+                nextBtn.click();
+                paginationCount++;
+                Thread.sleep(2000); // Wait for next page
+            } catch (Exception e) {
+                System.out.println("No more pages. No matching result found.");
+                break;
+            }
+		}
+	}
+
+	
+}
